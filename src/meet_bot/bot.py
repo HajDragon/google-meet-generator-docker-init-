@@ -35,9 +35,14 @@ def register_handlers(bot: telebot.TeleBot):
             ).execute()
             link = response['meetingUri']
             bot.reply_to(message, f"Instant Meet (full access for all—first joiner is host!)\nJoin → {link}")
+        except telebot.apihelper.ApiTelegramException as e:
+            logging.error(f"Telegram API error: {e}")
         except Exception as e:
             logging.exception("Failed to create meet")
-            bot.reply_to(message, f"Error: {str(e)}")
+            try:
+                bot.reply_to(message, f"Error: {str(e)}")
+            except:
+                pass
 
     @bot.inline_handler(lambda query: 'meet' in query.query.lower() or not query.query)
     def inline_query(query):

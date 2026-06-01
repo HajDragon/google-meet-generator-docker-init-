@@ -2,6 +2,8 @@
 .env
 credentials.json
 token.json
+credentials_base64.txt
+token_base64.txt
 
 # Python
 __pycache__/

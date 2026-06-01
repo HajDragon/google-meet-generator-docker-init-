@@ -51,7 +51,7 @@ Install with `pip install -r requirements.txt`:
 
 You can run the app directly using Python or inside Docker. The repository has been reorganized into a small package under `src/meet_bot`.
 
-Project layout (short):
+Project layout:
 
 ```
 . 
@@ -64,25 +64,85 @@ Project layout (short):
 ├─ run.py              # convenience script
 ├─ requirements.txt
 ├─ Dockerfile
+├─ .env.example        # environment template
 └─ README.md
 ```
 
-Run locally (from repo root):
+#### Option A: Run Locally with Python
 
-```bash
-cp .env.example .env
-# edit .env to set BOT_TOKEN and place credentials
-python run.py
-# or
-python -m src.meet_bot
-```
+1. **Set up environment:**
+   ```bash
+   # Create virtual environment
+   python -m venv .venv
+   source .venv/Scripts/activate  # Git Bash/Linux
+   # or .venv\Scripts\activate on Windows CMD/PowerShell
+   
+   # Install dependencies
+   pip install -r requirements.txt
+   ```
 
-Or with Docker:
+2. **Configure:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and set:
+   # - BOT_TOKEN=your_telegram_bot_token
+   # - MODE=polling (for local testing)
+   ```
 
-```bash
-docker build -t instant-meet-bot .
-docker run --env-file .env -p 10000:10000 instant-meet-bot
-```
+3. **Add credentials:**
+   - Place `credentials.json` (from Google Cloud) in project root
+
+4. **Run:**
+   ```bash
+   python run.py
+   # or
+   python -m src.meet_bot
+   ```
+
+#### Option B: Run with Docker
+
+1. **Build the image:**
+   ```bash
+   docker build -t instant-meet-bot .
+   ```
+
+2. **Prepare files:**
+   ```bash
+   # Copy and configure .env
+   cp .env.example .env
+   # Edit .env and set BOT_TOKEN and MODE
+   
+   # Ensure credentials.json exists
+   # Create empty token.json
+   touch token.json  # or: New-Item token.json on Windows PowerShell
+   ```
+
+3. **Run the container:**
+   
+   **For Git Bash (MINGW64):**
+   ```bash
+   docker run --env-file .env \
+     -v "$(pwd)/credentials.json:/app/credentials.json:ro" \
+     -v "$(pwd)/token.json:/app/token.json" \
+     instant-meet-bot
+   ```
+   
+   **For PowerShell:**
+   ```powershell
+   docker run --env-file .env `
+     -v "${PWD}\credentials.json:/app/credentials.json:ro" `
+     -v "${PWD}\token.json:/app/token.json" `
+     instant-meet-bot
+   ```
+   
+   **For CMD:**
+   ```cmd
+   docker run --env-file .env -v "%CD%\credentials.json:/app/credentials.json:ro" -v "%CD%\token.json:/app/token.json" instant-meet-bot
+   ```
+
+**Environment Modes:**
+- `MODE=polling` - For local development/testing (bot polls Telegram for updates)
+- `MODE=webhook` - For production deployment (Telegram sends updates to your server)
 
 ### 7. Hosting on Render (Free 24/7)
 1. Sign up at [render.com](https://render.com) with GitHub.
