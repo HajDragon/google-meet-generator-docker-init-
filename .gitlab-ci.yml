@@ -4,8 +4,8 @@ stages:
   - deploy
 
 variables:
-  # Using :latest is required for the simple Webhook trigger to work effectively
-  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:latest
+  # This is the exact path required for your registry
+  DOCKER_IMAGE: registry.gitlab.com/hajdragon/google-meet-generator-docker-init:latest
 
 test:
   stage: test
@@ -16,13 +16,13 @@ test:
 
 build:
   stage: build
-  image: docker:24.0.5
-  services:
-    - docker:24.0.5-dind
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $DOCKER_IMAGE .
-    - docker push $DOCKER_IMAGE
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $DOCKER_IMAGE
   only:
     - main
 
@@ -30,7 +30,7 @@ deploy:
   stage: deploy
   image: curlimages/curl:latest
   script:
-    # This triggers Azure to pull the latest image from GitLab and restart shawsh
+    # Trigger Azure to pull the new image
     - curl -X POST "$AZURE_WEBHOOK_URL"
   only:
     - main
