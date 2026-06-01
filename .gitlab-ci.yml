@@ -1,0 +1,36 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  # Using :latest is required for the simple Webhook trigger to work effectively
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:latest
+
+test:
+  stage: test
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - pytest
+
+build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_IMAGE .
+    - docker push $DOCKER_IMAGE
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  image: curlimages/curl:latest
+  script:
+    # This triggers Azure to pull the latest image from GitLab and restart shawsh
+    - curl -X POST "$AZURE_WEBHOOK_URL"
+  only:
+    - main
