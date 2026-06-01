@@ -32,5 +32,5 @@ def create_app(bot: telebot.TeleBot, token: Optional[str] = None) -> Flask:
 
     return app
 
-def run(app: Flask, host: str = "0.0.0.0", port: int = 10000):
+def run(app: Flask, host: str = "0.0.0.0", port: int = 8000):
     app.run(host=host, port=port)

@@ -51,6 +51,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'your-azure-app-name' # Replace with your Azure App Name
+          app-name: 'telegramServiceForGoogleMeet' # Replace with your Azure App Name
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: 'ghcr.io/${{ github.repository }}:main'
